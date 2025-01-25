@@ -113,9 +113,9 @@ func downHandle(w http.ResponseWriter, r *http.Request) {
 	for h, val := range resp.Data.Header {
 		req2.Header[h] = val
 	}
-	req2.Header().Set("Accept-Language", "en-US,en;q=0.9")
-	req2.Header().Set("X-Forwarded-For", "38.92.15.1")
-	req2.Header().Add("X-Real-IP", "38.92.15.1")
+	req2.Header.Set("Accept-Language", "en-US,en;q=0.9")
+	req2.Header.Set("X-Forwarded-For", "38.92.15.1")
+	req2.Header.Add("X-Real-IP", "38.92.15.1")
 	res2, err := HttpClient.Do(req2)
 	if err != nil {
 		errorResponse(w, 500, err.Error())
