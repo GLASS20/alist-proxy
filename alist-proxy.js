@@ -2,6 +2,7 @@
 var ADDRESS = "YOUR_ADDRESS";
 var TOKEN = "YOUR_TOKEN";
 var WORKER_ADDRESS = "YOUR_WORKER_ADDRESS";
+var TERABOX_ADDRESS = "https://jp.terabox.com"; // dm-t ca
 
 // src/verify.ts
 var verify = async (data, _sign) => {
@@ -41,20 +42,6 @@ var hmacSha256Sign = async (data, expire) => {
   return btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, "-").replace(/\//g, "_") + ":" + expire;
 };
 
-function replaceSubdomain(inputURL) {
-    const urlObj = new URL(inputURL);
-    const hostnameParts = urlObj.hostname.split('.');
-
-    // 检查域名是否符合替换条件
-    if (hostnameParts.length >= 3 && hostnameParts[0] === 'terabox') {
-        // 替换子域名
-        hostnameParts[0] = 'ca';
-        urlObj.hostname = hostnameParts.join('.');
-    }
-
-    return urlObj.toString();
-}
-
 // src/handleDownload.ts
 async function handleDownload(request) {
   const origin = request.headers.get("origin") ?? "*";
@@ -91,7 +78,11 @@ async function handleDownload(request) {
   if (res.code !== 200) {
     return new Response(JSON.stringify(res));
   }
-  request = new Request(replaceSubdomain(res.data.url), request);
+  
+  let tburl = res.data.url;
+  tburl = tburl.replace(/([^.]+)\.terabox\.com/, TERABOX_ADDRESS);
+  
+  request = new Request(tburl, request);
   if (res.data.header) {
     for (const k in res.data.header) {
       for (const v of res.data.header[k]) {
