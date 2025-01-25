@@ -122,7 +122,12 @@ func downHandle(w http.ResponseWriter, r *http.Request) {
 		resp.Data.Url = "http:" + resp.Data.Url
 	}
 	
-	resp.Data.Url = replaceSubdomain(resp.Data.Url)
+	resp.Data.Url, err = replaceSubdomain(resp.Data.Url)
+	if err != nil {
+	    errorResponse(w, 500, "Error replacing subdomain: "+err.Error())
+	    return
+	}
+
 	
 	fmt.Println("proxy:", resp.Data.Url)
 	if err != nil {
