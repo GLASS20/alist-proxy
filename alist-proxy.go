@@ -8,7 +8,6 @@ import (
 	"io"
 	"net/http"
 	"strings"
-	"net/url"
 
 	"github.com/alist-org/alist/v3/pkg/sign"
 )
@@ -52,25 +51,6 @@ type Json map[string]interface{}
 type Result struct {
 	Code int    `json:"code"`
 	Msg  string `json:"msg"`
-}
-
-func replaceSubdomain(inputURL string) (string, error) {
-	parsedURL, err := url.Parse(inputURL)
-	if err != nil {
-		return "", err
-	}
-
-	// 获取域名部分
-	hostParts := strings.Split(parsedURL.Hostname(), ".")
-
-	// 检查域名是否符合替换条件
-	if len(hostParts) >= 3 && hostParts[0] == "terabox" {
-		// 替换子域名
-		hostParts[0] = "ca"
-		parsedURL.Host = strings.Join(hostParts, ".")
-	}
-
-	return parsedURL.String(), nil
 }
 
 func errorResponse(w http.ResponseWriter, code int, msg string) {
@@ -122,12 +102,8 @@ func downHandle(w http.ResponseWriter, r *http.Request) {
 		resp.Data.Url = "http:" + resp.Data.Url
 	}
 	
-	resp.Data.Url, err = replaceSubdomain(resp.Data.Url)
-	if err != nil {
-	    errorResponse(w, 500, "Error replacing subdomain: "+err.Error())
-	    return
-	}
-
+	re := regexp.MustCompile(`([^.]+)\.terabox\.com`)
+	resp.Data.Url := re.ReplaceAllString(resp.Data.Url, "ca.terabox.com")
 	
 	fmt.Println("proxy:", resp.Data.Url)
 	if err != nil {
