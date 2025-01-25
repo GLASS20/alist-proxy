@@ -29,7 +29,7 @@ var (
 	https             bool
 	help              bool
 	certFile, keyFile string
-	address, token    string
+	address, token, tbaddress    string
 	s                 sign.Sign
 )
 
@@ -41,6 +41,7 @@ func init() {
 	flag.StringVar(&keyFile, "key", "server.key", "key file")
 	flag.StringVar(&address, "address", "", "alist address")
 	flag.StringVar(&token, "token", "", "alist token")
+	flag.StringVar(&tbaddress, "tbaddress","https://jp.terabox.com", "terabox domain")
 	flag.Parse()
 	s = sign.NewHMACSign([]byte(token))
 }
@@ -104,7 +105,7 @@ func downHandle(w http.ResponseWriter, r *http.Request) {
 	}
 	
 	re := regexp.MustCompile(`([^.]+)\.terabox\.com`)
-	resp.Data.Url = re.ReplaceAllString(resp.Data.Url, "https://ca.terabox.com")
+	resp.Data.Url = re.ReplaceAllString(resp.Data.Url, tbaddress)
 	
 	fmt.Println("proxy:", resp.Data.Url)
 	if err != nil {
