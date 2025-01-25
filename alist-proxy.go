@@ -8,7 +8,6 @@ import (
 	"io"
 	"net/http"
 	"strings"
-	"regexp"
 
 	"github.com/alist-org/alist/v3/pkg/sign"
 )
@@ -29,7 +28,7 @@ var (
 	https             bool
 	help              bool
 	certFile, keyFile string
-	address, token, tbaddress    string
+	address, token    string
 	s                 sign.Sign
 )
 
@@ -41,7 +40,6 @@ func init() {
 	flag.StringVar(&keyFile, "key", "server.key", "key file")
 	flag.StringVar(&address, "address", "", "alist address")
 	flag.StringVar(&token, "token", "", "alist token")
-	flag.StringVar(&tbaddress, "tbaddress","https://jp.terabox.com", "terabox domain")
 	flag.Parse()
 	s = sign.NewHMACSign([]byte(token))
 }
@@ -103,10 +101,6 @@ func downHandle(w http.ResponseWriter, r *http.Request) {
 	if !strings.HasPrefix(resp.Data.Url, "http") {
 		resp.Data.Url = "http:" + resp.Data.Url
 	}
-	
-	re := regexp.MustCompile(`([^.]+)\.terabox\.com`)
-	resp.Data.Url = re.ReplaceAllString(resp.Data.Url, tbaddress)
-	
 	fmt.Println("proxy:", resp.Data.Url)
 	if err != nil {
 		errorResponse(w, 500, err.Error())
@@ -119,9 +113,9 @@ func downHandle(w http.ResponseWriter, r *http.Request) {
 	for h, val := range resp.Data.Header {
 		req2.Header[h] = val
 	}
-	req2.Header.Set("Accept-Language", "en-US,en;q=0.9")
-	req2.Header.Set("X-Forwarded-For", "38.92.15.1")
-	req2.Header.Add("X-Real-IP", "38.92.15.1")
+
+	req2.Header.Set("X-Forwarded-For", "209.143.1.175")
+	req2.Header.Add("X-Real-IP", "209.143.1.175")
 	res2, err := HttpClient.Do(req2)
 	if err != nil {
 		errorResponse(w, 500, err.Error())
