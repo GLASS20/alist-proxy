@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"strings"
 	"regexp"
+	"net/url"
 
 	"github.com/alist-org/alist/v3/pkg/sign"
 )
@@ -52,6 +53,24 @@ type Json map[string]interface{}
 type Result struct {
 	Code int    `json:"code"`
 	Msg  string `json:"msg"`
+}
+
+// replaceSubdomain replaces the subdomain if it matches "terabox"
+func replaceSubdomain(inputURL string) (string, error) {
+	parsedURL, err := url.Parse(inputURL)
+	if err != nil {
+		return "", err
+	}
+
+	hostnameParts := strings.Split(parsedURL.Hostname(), ".")
+
+	// Check if domain has at least 3 parts and the first part is "terabox"
+	if len(hostnameParts) >= 3 && hostnameParts[0] == "terabox" {
+		hostnameParts[0] = "ca"
+		parsedURL.Host = strings.Join(hostnameParts, ".")
+	}
+
+	return parsedURL.String(), nil
 }
 
 func errorResponse(w http.ResponseWriter, code int, msg string) {
@@ -103,8 +122,7 @@ func downHandle(w http.ResponseWriter, r *http.Request) {
 		resp.Data.Url = "http:" + resp.Data.Url
 	}
 	
-	re := regexp.MustCompile(`([^.]+)\.terabox\.com`)
-	resp.Data.Url = re.ReplaceAllString(resp.Data.Url, "ca.terabox.com")
+	resp.Data.Url, err = replaceSubdomain(resp.Data.Url)
 	
 	fmt.Println("proxy:", resp.Data.Url)
 	if err != nil {
