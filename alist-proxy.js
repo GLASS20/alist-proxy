@@ -41,6 +41,20 @@ var hmacSha256Sign = async (data, expire) => {
   return btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, "-").replace(/\//g, "_") + ":" + expire;
 };
 
+function replaceSubdomain(inputURL) {
+    const urlObj = new URL(inputURL);
+    const hostnameParts = urlObj.hostname.split('.');
+
+    // 检查域名是否符合替换条件
+    if (hostnameParts.length >= 3 && hostnameParts[0] === 'terabox') {
+        // 替换子域名
+        hostnameParts[0] = 'ca';
+        urlObj.hostname = hostnameParts.join('.');
+    }
+
+    return urlObj.toString();
+}
+
 // src/handleDownload.ts
 async function handleDownload(request) {
   const origin = request.headers.get("origin") ?? "*";
@@ -77,7 +91,7 @@ async function handleDownload(request) {
   if (res.code !== 200) {
     return new Response(JSON.stringify(res));
   }
-  request = new Request(res.data.url, request);
+  request = new Request(replaceSubdomain(res.data.url), request);
   if (res.data.header) {
     for (const k in res.data.header) {
       for (const v of res.data.header[k]) {
@@ -85,6 +99,9 @@ async function handleDownload(request) {
       }
     }
   }
+  request.headers.set("Accept-Language", "en-US,en;q=0.9");
+  request.headers.set("X-Forwarded-For", "38.19.15.1");
+  request.headers.set("X-Real-IP", "38.19.15.1");
   let response = await fetch(request);
   while (response.status >= 300 && response.status < 400) {
     const location = response.headers.get("Location");
