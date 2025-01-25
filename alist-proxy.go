@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"regexp"
 
 	"github.com/alist-org/alist/v3/pkg/sign"
 )
