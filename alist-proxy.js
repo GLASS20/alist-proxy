@@ -2,7 +2,6 @@
 var ADDRESS = "YOUR_ADDRESS";
 var TOKEN = "YOUR_TOKEN";
 var WORKER_ADDRESS = "YOUR_WORKER_ADDRESS";
-var TERABOX_ADDRESS = "https://jp.terabox.com"; // dm-t ca
 
 // src/verify.ts
 var verify = async (data, _sign) => {
@@ -79,10 +78,7 @@ async function handleDownload(request) {
     return new Response(JSON.stringify(res));
   }
   
-  let tburl = res.data.url;
-  tburl = tburl.replace(/([^.]+)\.terabox\.com/, TERABOX_ADDRESS);
-  
-  request = new Request(tburl, request);
+  request = new Request(res.data.url, request);
   if (res.data.header) {
     for (const k in res.data.header) {
       for (const v of res.data.header[k]) {
@@ -90,9 +86,9 @@ async function handleDownload(request) {
       }
     }
   }
-  request.headers.set("Accept-Language", "en-US,en;q=0.9");
-  request.headers.set("X-Forwarded-For", "38.19.15.1");
-  request.headers.set("X-Real-IP", "38.19.15.1");
+
+  request.headers.set("X-Forwarded-For", "209.143.1.175");
+  request.headers.set("X-Real-IP", "209.143.1.175");
   let response = await fetch(request);
   while (response.status >= 300 && response.status < 400) {
     const location = response.headers.get("Location");
@@ -158,3 +154,4 @@ export {
   src_default as default
 };
 //# sourceMappingURL=index.js.map
+
