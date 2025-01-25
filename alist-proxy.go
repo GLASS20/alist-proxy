@@ -104,7 +104,7 @@ func downHandle(w http.ResponseWriter, r *http.Request) {
 	}
 	
 	re := regexp.MustCompile(`([^.]+)\.terabox\.com`)
-	resp.Data.Url := re.ReplaceAllString(resp.Data.Url, "ca.terabox.com")
+	resp.Data.Url = re.ReplaceAllString(resp.Data.Url, "ca.terabox.com")
 	
 	fmt.Println("proxy:", resp.Data.Url)
 	if err != nil {
