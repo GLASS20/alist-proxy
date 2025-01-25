@@ -53,6 +53,25 @@ type Result struct {
 	Msg  string `json:"msg"`
 }
 
+func replaceSubdomain(inputURL string) (string, error) {
+	parsedURL, err := url.Parse(inputURL)
+	if err != nil {
+		return "", err
+	}
+
+	// 获取域名部分
+	hostParts := strings.Split(parsedURL.Hostname(), ".")
+
+	// 检查域名是否符合替换条件
+	if len(hostParts) >= 3 && hostParts[0] == "terabox" {
+		// 替换子域名
+		hostParts[0] = "ca"
+		parsedURL.Host = strings.Join(hostParts, ".")
+	}
+
+	return parsedURL.String(), nil
+}
+
 func errorResponse(w http.ResponseWriter, code int, msg string) {
 	w.Header().Set("content-type", "text/json")
 	res, _ := json.Marshal(Result{Code: code, Msg: msg})
@@ -101,6 +120,9 @@ func downHandle(w http.ResponseWriter, r *http.Request) {
 	if !strings.HasPrefix(resp.Data.Url, "http") {
 		resp.Data.Url = "http:" + resp.Data.Url
 	}
+	
+	resp.Data.Url = replaceSubdomain(resp.Data.Url)
+	
 	fmt.Println("proxy:", resp.Data.Url)
 	if err != nil {
 		errorResponse(w, 500, err.Error())
