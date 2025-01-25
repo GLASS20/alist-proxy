@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"net/url"
 
 	"github.com/alist-org/alist/v3/pkg/sign"
 )
